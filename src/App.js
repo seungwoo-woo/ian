@@ -1,10 +1,10 @@
-import logo from './logo.svg';
 import './App.css';
+import MyCalendar from './components/MyCalendar';
 
 function App() {
   return (
     <div className="App">
-      IAN Networks
+      <MyCalendar />
     </div>
   );
 }

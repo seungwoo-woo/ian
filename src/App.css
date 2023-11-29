@@ -7,6 +7,9 @@
   pointer-events: none;
 }
 
+/* @import 'react-big-calendar/lib/sass/styles.scss';
+@import 'react-big-calendar/lib/addons/dragAndDrop/styles';  */
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
