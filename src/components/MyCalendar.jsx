@@ -25,25 +25,25 @@ function MyCalendar() {
   )
   // ----------------------------------------------
 
-  const events = []
-  //   {
-  //     id: 0,
-  //     start: new Date(2023, 11, 15),
-  //     end: new Date(2023, 11, 15),
-  //     title: "Sample Event",
-  //     sourceResource: '',
-  //     allDay: 'true'
-  //   },
-  //   {
-  //     id: 1,
-  //     start: new Date(2023, 11, 12),
-  //     end: new Date(2023, 11, 12),
-  //     title: "Sample Event2",
-  //     sourceResource: '',
-  //     allDay: 'true'
-  //   },
-  //   // more events...
-  // ];
+  const events = [
+    // {
+    //   id: 0,
+    //   start: new Date(2023, 11, 15),
+    //   end: new Date(2023, 11, 15),
+    //   title: "Sample Event",
+    //   sourceResource: '',
+    //   allDay: 'true'
+    // },
+    // {
+    //   id: 1,
+    //   start: new Date(2023, 11, 12),
+    //   end: new Date(2023, 11, 12),
+    //   title: "Sample Event2",
+    //   sourceResource: '',
+    //   allDay: 'true'
+    // },
+    // // more events...
+  ];
 
   const [ myEvents, setMyEvents ] = useState(events)
   const [ isEditEventOpen, setIsEditEventOpen ] = useState(false)
@@ -84,9 +84,13 @@ function MyCalendar() {
   // 신규 event 추가 -----------------------------------------
   const handleSelectSlot = useCallback(
     ({ start, end }) => {
+      console.log(start.getFullYear())
+      console.log(start.getMonth() + 1)
+      console.log(start.getDate())
+      const newstart = new Date(start.getFullYear(), start.getMonth(), start.getDate())
       const title = window.prompt(`New Event name`)
       if (title) {
-        setMyEvents((prev) => [...prev, { start, end, title, id: genEvID(), sourceResource:'', allDay:true }])
+        setMyEvents((prev) => [...prev, { start: newstart, end: newstart, title, id: genEvID(), sourceResource:'', allDay:'true' }])
       }
     },
     [genEvID]
@@ -101,10 +105,17 @@ function MyCalendar() {
 
 
   // 수정 Dialog 창 열기 ------------------------------------
-  const editEventDialogOpen = (event, e) => {
-    setSubjectEvent({...event, sourceResource: ''})    // e - calendar의 event object 임
+  const editEventDialogOpen = useCallback((event, e) => {
+    setSubjectEvent(event)
+
+    setMyEvents((prev) => {
+      const existing = prev.find((ev) => ev.id === event.id) ?? {}
+      const filtered = prev.filter((ev) => ev.id !== event.id)
+      return [...filtered, { ...existing, sourceResource: 'userID' }]
+    })   
+    
     setIsEditEventOpen(true);
-  }
+  },[])
   // 수정 Dialog 창 열기 ------------------------------------
 
 
@@ -185,6 +196,7 @@ function MyCalendar() {
       endAccessor="end"
       events={myEvents}
       onSelectEvent={editEventDialogOpen}
+      // onSelectEvent={handleSelectEvent}
       onSelectSlot={handleSelectSlot}
       onEventDrop={moveEvent}
       onEventResize={resizeEvent}
@@ -201,9 +213,9 @@ function MyCalendar() {
       </DialogTitle>
       <Divider />       
       <DialogContent>
-        <Typography variant="h6">해당 일정을 삭제할까요 ?</Typography>
+        <Typography variant="h8">해당 일정을 삭제할까요 ?</Typography>
         
-        {/* <TextField value={'subjectEvent.title'} id="title" label="일정 title" onChange={handleValueChange} margin="dense" type="text" fullWidth variant="standard" />  */}
+        {/* <TextField value={subjectEvent.title} id="title" label="일정 title" onChange={handleValueChange} margin="dense" type="text" fullWidth variant="standard" />  */}
       </DialogContent>
       <DialogActions>
         <Button onClick={hdcNewEventClose}>Cancel</Button>
