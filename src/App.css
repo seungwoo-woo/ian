@@ -7,6 +7,10 @@
   pointer-events: none;
 }
 
+.sunday-style {
+  color: 'blue'
+}
+
 /* @import 'react-big-calendar/lib/sass/styles.scss';
 @import 'react-big-calendar/lib/addons/dragAndDrop/styles';  */
 

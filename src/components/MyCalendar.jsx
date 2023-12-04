@@ -9,10 +9,6 @@ import ReportIcon from '@mui/icons-material/Report';
 import { pink } from '@mui/material/colors';
 
 
-// edit branch
-// edit branch2
-
-
 const DnDCalendar = withDragAndDrop(Calendar)
 const localizer = momentLocalizer(moment)
 
@@ -49,26 +45,62 @@ function MyCalendar() {
   ];
 
   const [ myEvents, setMyEvents ] = useState(events)
-  const [ isEditEventOpen, setIsEditEventOpen ] = useState(false)
-  const [ subjectEvent, setSubjectEvent ] = useState({title: '', start: '', end: ''})
 
 
-  // Open / Close Function ---------------------------------------------
-  const hdcNewEventClose = () => {
-    setIsEditEventOpen(false);
-  }
-  // Open / Close Function ---------------------------------------------
 
 
-  // handleValueChange Function -----------------------------------------
-  const handleValueChange = (e) => {
-    const keyValue = e.target.id;
-    const editCopy = {...subjectEvent, [keyValue]: e.target.value };
-    setSubjectEvent(editCopy);
-  }
-  // handleValueChange Function -----------------------------------------
+  // event별 style -----------------------------------------
+  const eventStyleGetter = (event, start, end, isSelected) => {
+    const style = {
+      backgroundColor: event.color, // 이벤트의 색상을 설정합니다.
+      borderRadius: '10px',
+      opacity: 0.8,
+      color: 'white',
+      border: '0px',
+      display: 'block',
+      width: '150px',
+      margin: '0 Auto',
+      textAlign: 'center'
+    };
 
+    const day = start.getDay();
 
+    if (day === 0 /* 일요일 */) {
+      return {
+        style: {
+          backgroundColor: 'red', // 일요일의 배경색을 여기에 지정하세요
+          borderRadius: '10px',
+          opacity: 0.8,
+          color: 'white',
+          border: '0px',
+          display: 'block',
+          width: '150px',
+          margin: '0 Auto',
+          textAlign: 'center'
+        },
+      };
+    }
+
+    if (day === 6 /* 토요일 */) {
+      return {
+        style: {
+          backgroundColor: 'blue', // 토요일의 배경색을 여기에 지정하세요
+          borderRadius: '10px',
+          opacity: 0.8,
+          color: 'white',
+          border: '0px',
+          display: 'block',
+          width: '150px',
+          margin: '0 Auto',
+          textAlign: 'center'
+        },
+      };
+    }
+
+    return {
+      style,
+    };
+  };
 
   // event id 발생 --------------------------------------------
   const genEvID = useCallback(() => { 
@@ -82,70 +114,28 @@ function MyCalendar() {
     return result;
     },[]) 
 
-
-
   // 신규 event 추가 -----------------------------------------
   const handleSelectSlot = useCallback(
     ({ start, end }) => {
-      console.log(start.getFullYear())
-      console.log(start.getMonth() + 1)
-      console.log(start.getDate())
-      const newstart = new Date(start.getFullYear(), start.getMonth(), start.getDate())
-      const title = window.prompt(`New Event name`)
+      const title = window.prompt(`New Event title`)
       if (title) {
-        setMyEvents((prev) => [...prev, { start: newstart, end: newstart, title, id: genEvID(), sourceResource:'', allDay:'true' }])
+        setMyEvents((prev) => [...prev, { start, end, title, id: genEvID(), sourceResource:'', allDay:'true', color: 'gray' }])
       }
     },
     [genEvID]
   )
 
-
-  // event 확인 ---------------------------------------------
+  // event 삭제 ---------------------------------------------
   const handleSelectEvent = useCallback(
-    (event) => window.alert(event.end),
-    []
+    (event) => {
+      let result = window.confirm('Evnet를 삭제할까요 ?')
+      if(result) {
+        setMyEvents((prev)=> {
+          return prev.filter((ev) => ev.id !== event.id)
+        })
+      }
+    },[]
   )
-
-
-  // 수정 Dialog 창 열기 ------------------------------------
-  const editEventDialogOpen = useCallback((event, e) => {
-    setSubjectEvent(event)
-
-    setMyEvents((prev) => {
-      const existing = prev.find((ev) => ev.id === event.id) ?? {}
-      const filtered = prev.filter((ev) => ev.id !== event.id)
-      return [...filtered, { ...existing, sourceResource: 'userID' }]
-    })   
-    
-    setIsEditEventOpen(true);
-  },[])
-  // 수정 Dialog 창 열기 ------------------------------------
-
-
-
-  // event 수정하기 -------------------------------------
-  const editEvent = useCallback(() => {                  // click을 하면 일정만 날아옴
-    setMyEvents((prev) => {
-      const existing = prev.find((ev) => ev.id === subjectEvent.id) ?? {}
-      const filtered = prev.filter((ev) => ev.id !== subjectEvent.id)
-      return [...filtered, { ...existing, title: subjectEvent.title, sourceResource: '' }]
-    })
-    setIsEditEventOpen(false);
-    }, 
-    [subjectEvent]
-  )
-
-
-  // event 삭제 -------------------------------------
-  const deleteEvent = useCallback(() => {                  // click을 하면 일정만 날아옴
-    setMyEvents((prev)=> {
-      return prev.filter((ev) => ev.id !== subjectEvent.id)
-    })
-    setIsEditEventOpen(false);
-    }, 
-    [subjectEvent]
-  ) 
-
 
   // event 이동 --------------------------------------------------
   const moveEvent = useCallback(
@@ -165,7 +155,6 @@ function MyCalendar() {
     [setMyEvents]
   )
 
-
   // 사이즈 변경 --------------------------------------------------
   const resizeEvent = useCallback(
     ({ event, start, end }) => {
@@ -178,14 +167,10 @@ function MyCalendar() {
     [setMyEvents]
   )
 
-
-
-
   // 임시 함수 -----------------------------
   const printEvent =()=> {
     console.log(myEvents)
   }
-
 
 
   return (
@@ -198,42 +183,19 @@ function MyCalendar() {
       startAccessor="start"
       endAccessor="end"
       events={myEvents}
-      onSelectEvent={editEventDialogOpen}
-      // onSelectEvent={handleSelectEvent}
-      onSelectSlot={handleSelectSlot}
-      onEventDrop={moveEvent}
-      onEventResize={resizeEvent}
+      showAllEvents
       draggableAccessor={(event) => true}
       selectable
-      popup
-      resizable
-      showAllEvents
+      onSelectSlot={handleSelectSlot}
+      onEventDrop={moveEvent}
+      eventPropGetter={eventStyleGetter}
+      onSelectEvent={handleSelectEvent}
+      // onSelectEvent={handleSelectEvent}    
+      // popup
+      // resizable
+      // onEventResize={resizeEvent}
       />
-
-    <Dialog open={isEditEventOpen} onClose={hdcNewEventClose}>
-      <DialogTitle sx={{color: pink[500], fontWeight: '400', display: 'flex', alignItems: 'center'}}>
-        <ReportIcon sx={{mr: 1}}/>일정 삭제 확인
-      </DialogTitle>
-      <Divider />       
-      <DialogContent>
-        <Typography variant="h8">해당 일정을 삭제할까요 ?</Typography>
-        
-        {/* <TextField value={subjectEvent.title} id="title" label="일정 title" onChange={handleValueChange} margin="dense" type="text" fullWidth variant="standard" />  */}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={hdcNewEventClose}>Cancel</Button>
-        {/* <Button onClick={editEvent}>수정</Button>           */}
-        <Button onClick={deleteEvent}>delete</Button>          
-      </DialogActions>
-    </Dialog>
-
-    </Container>
-    
-    
-
-    
-
-    
+    </Container>    
     </>
   )  
 }
