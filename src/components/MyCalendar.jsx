@@ -183,16 +183,17 @@ function MyCalendar() {
       startAccessor="start"
       endAccessor="end"
       events={myEvents}
-      showAllEvents
-      draggableAccessor={(event) => true}
+      showAllEvents      
       selectable
-      onSelectSlot={handleSelectSlot}
       onEventDrop={moveEvent}
       eventPropGetter={eventStyleGetter}
-      onSelectEvent={handleSelectEvent}
-      // onSelectEvent={handleSelectEvent}    
+
+      onSelectSlot={handleSelectSlot}
+      // onSelectEvent={handleSelectEvent}
+      onSelectEvent={handleSelectEvent}  
+      resizable = {false}
       // popup
-      // resizable
+      // draggableAccessor={(event) => true}
       // onEventResize={resizeEvent}
       />
     </Container>    
